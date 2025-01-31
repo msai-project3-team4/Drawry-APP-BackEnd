@@ -2,19 +2,14 @@ from fastapi import FastAPI
 from pymongo import MongoClient
 import redis
 import os
+from db.mongodb import db, collection
+from db.redis_db import redis_client
+from bson import ObjectId  # ObjectId 변환
+
+
 
 app = FastAPI()
 
-# MongoDB 연결 설정
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/mydatabase")  # 컨테이너 내부 주소 사용
-mongo_client = MongoClient(MONGO_URI)
-db = mongo_client.get_database("mydatabase")
-collection = db.get_collection("test_collection")
-
-# Redis 연결 설정
-REDIS_HOST = os.getenv("REDIS_HOST", "redis")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 @app.get("/")
 def read_root():
@@ -23,8 +18,28 @@ def read_root():
 @app.get("/mongo-test")
 def mongo_test():
     doc = {"name": "Test User", "age": 25}
-    collection.insert_one(doc)
-    return {"message": "Inserted into MongoDB!", "data": doc}
+    result = collection.insert_one(doc)  # MongoDB에 삽입
+    inserted_id = str(result.inserted_id)  # ObjectId를 문자열로 변환
+     # 삽입한 데이터 조회 후 `_id` 변환
+    inserted_doc = collection.find_one({"_id": result.inserted_id})
+    inserted_doc["_id"] = str(inserted_doc["_id"])  # `_id`를 JSON 직렬화 가능하도록 변환
+
+    return {
+        "message": "Inserted into MongoDB!",
+        "inserted_id": inserted_id,
+        "data": inserted_doc
+    }
+
+@app.get("/mongo-fetch")
+def fetch_mongo():
+    data = collection.find_one({"name": "Test User"})  # 데이터 조회
+    if data:
+        data["_id"] = str(data["_id"])  # ObjectId를 문자열로 변환
+        return {
+            "message": "Fetched from MongoDB!",
+            "data": data
+        }
+    return {"message": "No data found!"}
 
 @app.get("/redis-test")
 def redis_test():
