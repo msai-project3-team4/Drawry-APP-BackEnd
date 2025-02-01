@@ -6,3 +6,4 @@ pymongo
 redis
 passlib[bcrypt]
 python-dotenv
+python-multipart

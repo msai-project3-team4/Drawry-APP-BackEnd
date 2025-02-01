@@ -25,6 +25,8 @@ services:
       - "27017:27017"
     networks:
       - my_project_network
+    volumes:
+      - mongo_data:/data/db
     healthcheck:
       test: ["CMD", "mongo", "--eval", "db.runCommand({ ping: 1 })"]
       interval: 10s
@@ -47,3 +49,6 @@ services:
 networks:
   my_project_network:
     external: true
+
+volumes:
+  mongo_data:
