@@ -1,4 +1,8 @@
 fastapi
 uvicorn
+python-jose[cryptography]
+pydantic
 pymongo
 redis
+passlib[bcrypt]
+python-dotenv
