@@ -14,9 +14,7 @@ services:
       redis:
         condition: service_healthy
     environment:
-      MONGO_URI: "mongodb://mongo:27017/mydatabase"
-      REDIS_HOST: "redis"
-      REDIS_PORT: "6379"
+      - ./app/.env
 
   mongo:
     image: mongo:5.0
