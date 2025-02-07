@@ -11,4 +11,4 @@ app.include_router(api_router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the Sketch-based Storybook API!"}
+    return {"message": "좋은 예시건 나쁜 예시건 그런건 없어요 .. 두현님 명언제조기 .. "}
