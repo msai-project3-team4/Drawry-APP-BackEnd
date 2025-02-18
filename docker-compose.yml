@@ -13,8 +13,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
+    env_file:
       - ./app/.env
+    environment:
+      - PYTHONPATH=/app
 
   mongo:
     image: mongo:5.0
