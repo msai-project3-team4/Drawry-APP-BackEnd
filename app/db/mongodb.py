@@ -36,4 +36,7 @@ db = mongo_client["mydatabase"]
 # ✅ 컬렉션 정의 (다른 모듈에서 쉽게 사용 가능)
 collection = db["test_collection"]
 users_collection = db["users"]
+users_collection.create_index("nickname", unique=True)
+
 uploads_collection = db["uploads"]
+library_collection = db["library"]
