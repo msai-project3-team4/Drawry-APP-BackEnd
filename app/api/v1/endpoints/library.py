@@ -168,6 +168,6 @@ def get_story_and_character(nickname: str):
         raise HTTPException(status_code=404, detail="선택된 동화책과 캐릭터가 없습니다.")
 
     return {
-        "title": library["selected_story"],
-        "character": library["selected_character"]
+        "title": library["selected_story"].encode("utf-8").decode("utf-8"),
+        "character": library["selected_character"].encode("utf-8").decode("utf-8")
     }
