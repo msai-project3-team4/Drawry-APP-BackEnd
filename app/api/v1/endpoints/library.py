@@ -25,7 +25,7 @@ class AddCharacter(BaseModel):
 class UpdateBookTitle(BaseModel):
     new_title: str  # ✅ 책 제목 수정용
 
-class StorySelction(BaseModel):
+class StorySelection(BaseModel):  # ✅ 오타 수정
     story: str
     character: str
 
@@ -130,7 +130,7 @@ def update_book_title(nickname: str, book_id: str, book_data: UpdateBookTitle):
 
 # ✅ (9) 사용자가 선택한 동화책 & 캐릭터 저장
 @router.post("/library/{nickname}/selection")
-def save_story_selection(nickname: str, selection: StorySelection):
+def save_story_selection(nickname: str, selection: StorySelection):  # ✅ 오타 수정
     library = library_collection.find_one({"nickname": nickname})
     
     if not library:
