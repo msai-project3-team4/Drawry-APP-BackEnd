@@ -25,6 +25,10 @@ class AddCharacter(BaseModel):
 class UpdateBookTitle(BaseModel):
     new_title: str  # ✅ 책 제목 수정용
 
+class StorySelction(BaseModel):
+    story: str
+    character: str
+
 # ✅ (1) 특정 사용자의 서재 조회
 @router.get("/library/{nickname}", response_model=LibraryResponse)
 def get_library(nickname: str):
@@ -123,3 +127,29 @@ def update_book_title(nickname: str, book_id: str, book_data: UpdateBookTitle):
 
     library_collection.update_one({"nickname": nickname}, {"$set": {"books": updated_books}})
     return {"message": "책 제목이 수정되었습니다.", "new_title": book_data.new_title}
+
+# ✅ (9) 사용자가 선택한 동화책 & 캐릭터 저장
+@router.post("/library/{nickname}/selection")
+def save_story_selection(nickname: str, selection: StorySelection):
+    library = library_collection.find_one({"nickname": nickname})
+    
+    if not library:
+        raise HTTPException(status_code=404, detail="서재를 찾을 수 없습니다.")
+
+    library_collection.update_one(
+        {"nickname": nickname},
+        {"$set": {"selected_story": selection.story, "selected_character": selection.character}}
+    )
+    return {"message": "선택한 동화책과 캐릭터가 저장되었습니다."}
+
+# ✅ (10) 사용자가 선택한 동화책 & 캐릭터 조회
+@router.get("/library/{nickname}/selection")
+def get_story_selection(nickname: str):
+    library = library_collection.find_one({"nickname": nickname})
+    if not library or "selected_story" not in library or "selected_character" not in library:
+        raise HTTPException(status_code=404, detail="선택된 동화책과 캐릭터가 없습니다.")
+    
+    return {
+        "story": library["selected_story"],
+        "character": library["selected_character"]
+    }
