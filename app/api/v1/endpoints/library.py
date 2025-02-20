@@ -32,6 +32,15 @@ class StorySelection(BaseModel):
 class CharacterSelection(BaseModel):
     character: str  # ✅ 캐릭터 저장
 
+class TimeSelection(BaseModel):
+    time: str # 낮 또는 밤
+
+class LocationSelection(BaseModel):
+    location: str # 아그라바, 시장, 왕궁, 마법의 동굴, 지니의 세계
+
+class ActionSelection(BaseModel):
+    action: str
+
 # ✅ (2) 특정 사용자의 서재 조회
 @router.get("/library/{nickname}", response_model=LibraryResponse)
 def get_library(nickname: str):
@@ -170,4 +179,62 @@ def get_story_and_character(nickname: str):
     return {
         "title": library["selected_story"].encode("utf-8").decode("utf-8"),
         "character": library["selected_character"].encode("utf-8").decode("utf-8")
+    }
+
+# 낮 과 밤 API
+@router.post("/library/{nickname}/select-time")
+def save_time_selection(nickname: str, selection: TimeSelection):
+    library = library_collection.find_one({"nickname": nickname})
+
+    if not library:
+        raise HTTPException(status_code=404, detail="서재를 찾을 수 없습니다.")
+    
+    library_collection.update_one(
+        {"nickname": nickname},
+        {"$set": {"selected_time": selection.time}}
+    )
+    return {"message": "시간대가 저장되었습니다.", "time": selection.time}
+
+
+# 주인공 위치 선택 API
+@router.post("/library/{nickname}/select-location")
+def save_location_selection(nickname: str, selection: LocationSelection):
+    library = library_collection.find_one({"nickname": nickname})
+
+    if not library or "selected_time" not in library:
+        raise HTTPException(status_code=404, detail="시간대가 먼저 선택되지 않았습니다.")
+
+    library_collection.update_one(
+        {"nickname": nickname},
+        {"$set": {"selected_location": selection.location}}
+    )
+    return {"message": "위치가 저장되었습니다.", "location": selection.location}
+
+
+# 주인공 행동 선택 API
+@router.post("/library/{nickname}/select-action")
+def save_action_selection(nickname: str, selection: ActionSelection):
+    library = library_collection.find_one({"nickname": nickname})
+
+    if not library or "selected_location" not in library:
+        raise HTTPException(status_code=404, detail="위치가 먼저 선택되지 않았습니다.")
+
+    library_collection.update_one(
+        {"nickname": nickname},
+        {"$set": {"selected_action": selection.action}}
+    )
+    return {"message": "행동이 저장되었습니다.", "action": selection.action}
+
+# 진행 상태 조회
+@router.get("/library/{nickname}/story-progress")
+def get_story_progress(nickname: str):
+    library = library_collection.find_one({"nickname": nickname})
+
+    if not library:
+        raise HTTPException(status_code=404, detail="서재를 찾을 수 없습니다.")
+
+    return {
+        "selected_time": library.get("selected_time", None),
+        "selected_location": library.get("selected_location", None),
+        "selected_action": library.get("selected_action", None)
     }
